@@ -9,4 +9,8 @@ class EspacioRepository(private val dao: EspacioDao) {
     val espacios: Flow<List<EspacioEntity>> = dao.obtenerTodos()
 
     suspend fun obtenerPorId(id: Int): EspacioEntity? = dao.obtenerPorId(id)
+
+    suspend fun insertar(espacio: EspacioEntity) = dao.insertar(espacio)
+
+    suspend fun actualizar(espacio: EspacioEntity) = dao.actualizar(espacio)
 }

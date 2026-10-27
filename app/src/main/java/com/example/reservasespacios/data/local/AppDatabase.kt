@@ -7,7 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [EspacioEntity::class, UsuarioEntity::class, ReservaEntity::class],
+    entities = [
+        EspacioEntity::class,
+        UsuarioEntity::class,
+        ReservaEntity::class,
+        BloqueoEntity::class,
+        NotificacionEntity::class
+    ],
     version = 1,
     exportSchema = false
 )
@@ -16,6 +22,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun espacioDao(): EspacioDao
     abstract fun usuarioDao(): UsuarioDao
     abstract fun reservaDao(): ReservaDao
+    abstract fun bloqueoDao(): BloqueoDao
+    abstract fun notificacionDao(): NotificacionDao
 
     companion object {
         @Volatile

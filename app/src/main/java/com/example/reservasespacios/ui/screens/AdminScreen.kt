@@ -10,9 +10,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MeetingRoom
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -39,6 +41,8 @@ import com.example.reservasespacios.viewmodel.AdminViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminScreen(
+    onEspacios: () -> Unit,
+    onBloqueos: () -> Unit,
     onCerrarSesion: () -> Unit,
     viewModel: AdminViewModel = viewModel()
 ) {
@@ -50,8 +54,14 @@ fun AdminScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Solicitudes pendientes") },
+                title = { Text("Pendientes") },
                 actions = {
+                    IconButton(onClick = onEspacios) {
+                        Icon(Icons.Default.MeetingRoom, contentDescription = "Gestionar espacios")
+                    }
+                    IconButton(onClick = onBloqueos) {
+                        Icon(Icons.Default.Block, contentDescription = "Bloquear horarios")
+                    }
                     IconButton(onClick = onCerrarSesion) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar sesión")
                     }

@@ -4,9 +4,12 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.reservasespacios.data.local.AppDatabase
+import com.example.reservasespacios.data.local.NotificacionEntity
 import com.example.reservasespacios.data.local.ReservaConDetalle
+import com.example.reservasespacios.data.repository.NotificacionRepository
 import com.example.reservasespacios.data.repository.ReservaRepository
 import com.example.reservasespacios.domain.validation.ReservaValidator
+import com.example.reservasespacios.util.NotificacionHelper
 import com.example.reservasespacios.util.SesionActual
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,7 +29,9 @@ data class AdminUiState(
 
 class AdminViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = ReservaRepository(AppDatabase.obtener(application).reservaDao())
+    private val db = AppDatabase.obtener(application)
+    private val repository = ReservaRepository(db.reservaDao())
+    private val notificacionRepository = NotificacionRepository(db.notificacionDao())
 
     val pendientes: StateFlow<List<ReservaConDetalle>> = repository.pendientes
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -60,6 +65,22 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 adminId = SesionActual.usuarioId,
                 fecha = LocalDate.now().toString()
             )
+
+            val mensaje = "${reserva.espacioNombre} el ${reserva.reserva.fecha} " +
+                    "de ${reserva.reserva.horaInicio} a ${reserva.reserva.horaFin}"
+
+            // Aviso dentro de la app para el solicitante
+            notificacionRepository.crear(
+                NotificacionEntity(
+                    usuarioId = reserva.reserva.usuarioId,
+                    titulo = "Solicitud aprobada",
+                    mensaje = mensaje,
+                    fecha = LocalDate.now().toString()
+                )
+            )
+            // Notificación del sistema (recurso nativo)
+            NotificacionHelper.mostrar(getApplication(), "Solicitud aprobada", mensaje)
+
             _uiState.update { AdminUiState() }
         }
     }
@@ -82,6 +103,20 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
                 adminId = SesionActual.usuarioId,
                 fecha = LocalDate.now().toString()
             )
+
+            val mensaje = "${reserva.espacioNombre} el ${reserva.reserva.fecha}. " +
+                    "Motivo: ${estado.justificacion.trim()}"
+
+            notificacionRepository.crear(
+                NotificacionEntity(
+                    usuarioId = reserva.reserva.usuarioId,
+                    titulo = "Solicitud rechazada",
+                    mensaje = mensaje,
+                    fecha = LocalDate.now().toString()
+                )
+            )
+            NotificacionHelper.mostrar(getApplication(), "Solicitud rechazada", mensaje)
+
             _uiState.update { AdminUiState() }
         }
     }

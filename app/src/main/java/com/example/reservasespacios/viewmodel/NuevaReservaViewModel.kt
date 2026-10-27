@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.reservasespacios.data.local.AppDatabase
 import com.example.reservasespacios.data.local.EspacioEntity
 import com.example.reservasespacios.data.local.ReservaEntity
+import com.example.reservasespacios.data.repository.BloqueoRepository
 import com.example.reservasespacios.data.repository.EspacioRepository
 import com.example.reservasespacios.data.repository.ReservaRepository
 import com.example.reservasespacios.domain.validation.ReservaValidator
@@ -43,6 +44,7 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
     private val db = AppDatabase.obtener(application)
     private val espacioRepository = EspacioRepository(db.espacioDao())
     private val reservaRepository = ReservaRepository(db.reservaDao())
+    private val bloqueoRepository = BloqueoRepository(db.bloqueoDao())
 
     private val _uiState = MutableStateFlow(NuevaReservaUiState())
     val uiState: StateFlow<NuevaReservaUiState> = _uiState.asStateFlow()
@@ -115,13 +117,18 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             _uiState.update { it.copy(mostrarConfirmacion = false, cargando = true) }
 
-            if (reservaRepository.hayTraslape(espacio.id, fecha, inicio, fin)) {
-                _uiState.update {
-                    it.copy(
-                        cargando = false,
-                        errorGeneral = "Ya existe una reserva para ese espacio en ese horario"
-                    )
-                }
+            val mensajeError = when {
+                espacio.estado != "DISPONIBLE" ->
+                    "El espacio no está disponible para reservas"
+                bloqueoRepository.hayBloqueo(espacio.id, fecha, inicio, fin) ->
+                    "El espacio está bloqueado en ese horario"
+                reservaRepository.hayTraslape(espacio.id, fecha, inicio, fin) ->
+                    "Ya existe una reserva para ese espacio en ese horario"
+                else -> null
+            }
+
+            if (mensajeError != null) {
+                _uiState.update { it.copy(cargando = false, errorGeneral = mensajeError) }
             } else {
                 reservaRepository.crear(
                     ReservaEntity(
