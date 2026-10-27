@@ -1,5 +1,9 @@
 package com.example.reservasespacios.ui.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,7 +21,14 @@ import com.example.reservasespacios.util.SesionActual
 fun AppNavGraph() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(
+        navController = navController,
+        startDestination = "login",
+        enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+        exitTransition = { slideOutHorizontally(targetOffsetX = { -it / 3 }) + fadeOut() },
+        popEnterTransition = { slideInHorizontally(initialOffsetX = { -it / 3 }) + fadeIn() },
+        popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }
+    ) {
         composable("login") {
             LoginScreen(
                 onLoginExitoso = { perfil ->
