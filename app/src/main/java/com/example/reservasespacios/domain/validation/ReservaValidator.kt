@@ -91,4 +91,9 @@ object ReservaValidator {
         }
         return ValidationResult(true)
     }
+    fun validarJustificacion(texto: String): ValidationResult = when {
+        texto.isBlank() -> ValidationResult(false, "Escribe la justificación del rechazo")
+        texto.trim().length < 5 -> ValidationResult(false, "La justificación debe tener al menos 5 caracteres")
+        else -> ValidationResult(true)
+    }
 }
