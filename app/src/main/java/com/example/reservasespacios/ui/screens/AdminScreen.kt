@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.reservasespacios.data.local.ReservaConDetalle
 import com.example.reservasespacios.ui.components.CampoFormulario
+import com.example.reservasespacios.ui.components.SolicitarPermisoNotificaciones
 import com.example.reservasespacios.viewmodel.AdminViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +44,8 @@ fun AdminScreen(
 ) {
     val pendientes by viewModel.pendientes.collectAsState()
     val estado by viewModel.uiState.collectAsState()
+
+    SolicitarPermisoNotificaciones()
 
     Scaffold(
         topBar = {
