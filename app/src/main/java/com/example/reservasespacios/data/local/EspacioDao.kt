@@ -16,4 +16,7 @@ interface EspacioDao {
 
     @Insert
     suspend fun insertar(espacio: EspacioEntity)
+
+    @Query("SELECT * FROM espacios WHERE id = :id")
+    suspend fun obtenerPorId(id: Int): EspacioEntity?
 }

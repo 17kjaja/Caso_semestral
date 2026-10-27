@@ -2,6 +2,7 @@ package com.example.reservasespacios.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.example.reservasespacios.util.SesionActual
 import androidx.lifecycle.viewModelScope
 import com.example.reservasespacios.data.local.AppDatabase
 import com.example.reservasespacios.data.repository.UsuarioRepository
@@ -55,6 +56,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             if (usuario == null) {
                 _uiState.update { it.copy(cargando = false, errorGeneral = "Usuario o clave incorrectos") }
             } else {
+                SesionActual.usuarioId = usuario.id
+                SesionActual.perfil = usuario.perfil
                 _uiState.update { it.copy(cargando = false, perfilLogueado = usuario.perfil) }
             }
         }

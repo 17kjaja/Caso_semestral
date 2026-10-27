@@ -7,4 +7,6 @@ import kotlinx.coroutines.flow.Flow
 class EspacioRepository(private val dao: EspacioDao) {
 
     val espacios: Flow<List<EspacioEntity>> = dao.obtenerTodos()
+
+    suspend fun obtenerPorId(id: Int): EspacioEntity? = dao.obtenerPorId(id)
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +25,10 @@ import com.example.reservasespacios.viewmodel.EspacioViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CatalogoScreen(viewModel: EspacioViewModel = viewModel()) {
+fun CatalogoScreen(
+    onReservar: (Int) -> Unit,
+    viewModel: EspacioViewModel = viewModel()
+) {
     val espacios by viewModel.espacios.collectAsState()
 
     Scaffold(
@@ -36,14 +40,14 @@ fun CatalogoScreen(viewModel: EspacioViewModel = viewModel()) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(espacios) { espacio ->
-                EspacioCard(espacio)
+                EspacioCard(espacio, onReservar = { onReservar(espacio.id) })
             }
         }
     }
 }
 
 @Composable
-fun EspacioCard(espacio: EspacioEntity) {
+fun EspacioCard(espacio: EspacioEntity, onReservar: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = espacio.nombre, style = MaterialTheme.typography.titleMedium)
@@ -56,6 +60,12 @@ fun EspacioCard(espacio: EspacioEntity) {
                 text = "Horario: ${espacio.horaApertura} a ${espacio.horaCierre}",
                 style = MaterialTheme.typography.bodySmall
             )
+            Button(
+                onClick = onReservar,
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Solicitar")
+            }
         }
     }
 }
