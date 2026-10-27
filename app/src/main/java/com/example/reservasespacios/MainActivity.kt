@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.reservasespacios.ui.screens.CatalogoScreen
+import com.example.reservasespacios.ui.navigation.AppNavGraph
 import com.example.reservasespacios.ui.theme.ReservasEspaciosTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ReservasEspaciosTheme {
-                CatalogoScreen()
+                AppNavGraph()
             }
         }
     }
