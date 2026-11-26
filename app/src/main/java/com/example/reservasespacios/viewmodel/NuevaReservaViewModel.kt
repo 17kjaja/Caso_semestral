@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.reservasespacios.data.local.AppDatabase
 import com.example.reservasespacios.data.local.EspacioEntity
 import com.example.reservasespacios.data.local.ReservaEntity
+import com.example.reservasespacios.data.remote.RetrofitClient
 import com.example.reservasespacios.data.repository.BloqueoRepository
 import com.example.reservasespacios.data.repository.EspacioRepository
+import com.example.reservasespacios.data.repository.FeriadosRepository
 import com.example.reservasespacios.data.repository.ReservaRepository
 import com.example.reservasespacios.domain.validation.ReservaValidator
 import com.example.reservasespacios.util.SesionActual
@@ -45,6 +47,7 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
     private val espacioRepository = EspacioRepository(db.espacioDao())
     private val reservaRepository = ReservaRepository(db.reservaDao())
     private val bloqueoRepository = BloqueoRepository(db.bloqueoDao())
+    private val feriadosRepository = FeriadosRepository(RetrofitClient.feriadosApi)
 
     private val _uiState = MutableStateFlow(NuevaReservaUiState())
     val uiState: StateFlow<NuevaReservaUiState> = _uiState.asStateFlow()
@@ -117,9 +120,17 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             _uiState.update { it.copy(mostrarConfirmacion = false, cargando = true) }
 
+            val feriado = try {
+                feriadosRepository.feriadoDe(fecha)
+            } catch (_: Exception) {
+                null
+            }
+
             val mensajeError = when {
                 espacio.estado != "DISPONIBLE" ->
                     "El espacio no está disponible para reservas"
+                feriado != null ->
+                    "No se puede reservar en día feriado (${feriado.localName})"
                 bloqueoRepository.hayBloqueo(espacio.id, fecha, inicio, fin) ->
                     "El espacio está bloqueado en ese horario"
                 reservaRepository.hayTraslape(espacio.id, fecha, inicio, fin) ->
@@ -131,7 +142,7 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
                 _uiState.update { it.copy(cargando = false, errorGeneral = mensajeError) }
             } else {
                 reservaRepository.crear(
-                    ReservaEntity(
+                    reserva = ReservaEntity(
                         espacioId = espacio.id,
                         usuarioId = SesionActual.usuarioId,
                         fecha = fecha,
@@ -142,7 +153,8 @@ class NuevaReservaViewModel(application: Application) : AndroidViewModel(applica
                         asistentes = e.asistentes.trim().toInt(),
                         observaciones = e.observaciones.trim(),
                         fechaCreacion = LocalDate.now().toString()
-                    )
+                    ),
+                    espacioNombre = espacio.nombre
                 )
                 _uiState.update { it.copy(cargando = false, guardadoExitoso = true) }
             }
